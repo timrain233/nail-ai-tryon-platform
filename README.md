@@ -490,7 +490,7 @@ MIT License
 
 ## 团队
 
-NAIL AI Team — AI美甲智能试戴与运营平台
+timrain233 
 
 ---
 
