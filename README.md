@@ -1,5 +1,5 @@
 # nail-ai-tryon-platform
-nail-ai-tryon-platform
+
 # NAIL AI — AI美甲智能试戴与运营平台
 
 > **前后端一体化 · AI驱动 · 全链路自动化 · 云端部署**
