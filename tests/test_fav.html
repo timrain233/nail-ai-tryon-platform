@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.5,viewport-fit=cover">
+<script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,'PingFang SC','Microsoft YaHei','Noto Sans SC',sans-serif;background:#f8f7f4;min-height:100vh}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.pg{min-height:100vh;background:#f8f7f4;padding-bottom:80px;background-image:radial-gradient(ellipse at 50% 0%,rgba(196,168,130,0.05) 0%,transparent 70%)}
+.hd{display:flex;align-items:center;gap:8px;padding:14px 12px 8px;position:sticky;top:0;z-index:10;background:rgba(248,247,244,0.92);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid rgba(0,0,0,0.03)}
+.bk{background:none;border:none;cursor:pointer;padding:4px;color:#666;display:flex;align-items:center;-webkit-tap-highlight-color:transparent;border-radius:50%;width:36px;height:36px;justify-content:center}
+.bk:active{background:rgba(0,0,0,0.05)}
+.tt{font-size:16px;font-weight:600;color:#1a1a1a;flex:1;text-align:center;letter-spacing:0.02em;padding-right:36px}
+.tabs{display:flex;margin:12px 16px;border-radius:12px;background:#f0eeeb;overflow:hidden;padding:3px}
+.tb{flex:1;text-align:center;padding:8px 0;font-size:13px;color:#888;cursor:pointer;border-radius:9px;transition:all 0.25s;-webkit-tap-highlight-color:transparent;font-weight:500}
+.tb.active{background:#fff;color:#c4a882;box-shadow:0 1px 6px rgba(0,0,0,0.06);font-weight:600}
+.tb-icon{vertical-align:-2px;margin-right:3px}
+.em{text-align:center;padding:60px 20px}
+.em-icon{opacity:0.25;margin-bottom:10px}
+.em-txt{color:#bbb;font-size:13px;line-height:1.6}
+.gw{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;padding:0 16px}
+.gc{border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.04);border:1px solid rgba(255,255,255,0.6);animation:fadeUp 0.35s ease-out both}
+.gc-img{width:100%;aspect-ratio:1/1;overflow:hidden;background:#f5f3f0;position:relative}
+.gc-img img{width:100%;height:100%;object-fit:cover;display:block}
+.gc-badge{position:absolute;top:6px;right:6px;background:rgba(196,168,130,0.85);color:#fff;font-size:9px;padding:2px 7px;border-radius:6px;font-weight:500;backdrop-filter:blur(4px)}
+.gc-info{padding:8px 10px 10px}
+.gc-name{font-size:13px;color:#1a1a1a;font-weight:500;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gc-tags{font-size:10px;color:#999;padding-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gc-time{font-size:9px;color:#ccc;padding-top:2px}
+.loading-spinner{text-align:center;padding:80px 20px;color:#ccc;font-size:13px}
+.loading-spinner iconify-icon{animation:spin 0.8s linear infinite;margin-bottom:8px}
+@keyframes spin{100%{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="pg">
+  <div class="hd">
+    <button class="bk" id="goBack"><iconify-icon icon="lucide:arrow-left" width="20" height="20"></iconify-icon></button>
+    <span class="tt">我的收藏与试戴</span>
+  </div>
+  <div class="tabs">
+    <span class="tb active" data-tab="fav"><iconify-icon icon="lucide:heart" class="tb-icon" width="14" height="14"></iconify-icon>收藏</span>
+    <span class="tb" data-tab="tryon"><iconify-icon icon="lucide:camera" class="tb-icon" width="14" height="14"></iconify-icon>试戴记录</span>
+  </div>
+  <div id="favBox"><div class="loading-spinner"><iconify-icon icon="lucide:loader" width="28" height="28"></iconify-icon><div>加载中...</div></div></div>
+  <div id="tryonBox" style="display:none"><div class="loading-spinner"><iconify-icon icon="lucide:loader" width="28" height="28"></iconify-icon><div>加载中...</div></div></div>
+</div>
+<script>
+(function() {
+    function _imgSrc(itemId) {
+        var num = ('000' + itemId).slice(-3);
+        return '/nail_cut3/img_' + num + '/0_thumb.png';
+    }
+
+    function _renderGrid(name, items, boxId) {
+        var box = document.getElementById(boxId);
+        if (!box) return;
+        if (!items || items.length === 0) {
+            box.innerHTML = '<div class="em"><div class="em-icon"><iconify-icon icon="lucide:' + (boxId === 'favBox' ? 'heart-off' : 'image-off') + '" width="40" height="40"></iconify-icon></div><div class="em-txt">暂无' + name + '</div></div>';
+            return;
+        }
+        var h = '<div class="gw">';
+        for (var i = 0; i < items.length; i++) {
+            var it = items[i];
+            var scene = it.scene || '';
+            var color = it.color || '';
+            var tags = scene;
+            if (color && tags.indexOf(color) === -1) tags = tags ? color + ' · ' + tags : color;
+            var isTryon = boxId === 'tryonBox';
+            var imgUrl = it.image ? it.image : _imgSrc(it.item_id);
+            h += '<div class="gc" style="animation-delay:' + (i * 0.04) + 's">';
+            h += '<div class="gc-img">';
+            if (isTryon && it.image) h += '<span class="gc-badge">试戴</span>';
+            h += '<img src="' + imgUrl + '" alt="' + it.item_name + '" loading="lazy" onerror="this.onerror=null;this.style.display='none';this.parentElement.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;color:#ccc;font-size:10px;\'>图片加载中</div>'" />';
+            h += '</div><div class="gc-info">';
+            h += '<div class="gc-name">' + it.item_name + '</div>';
+            h += '<div class="gc-tags">' + tags + '</div>';
+            if (it.time) h += '<div class="gc-time">' + it.time + '</div>';
+            h += '</div></div>';
+        }
+        h += '</div>';
+        box.innerHTML = h;
+    }
+
+    document.getElementById('goBack').onclick = function() {
+        window.location.href = '/go_home';
+    };
+
+    document.querySelectorAll('.tb').forEach(function(el) {
+        el.onclick = function() {
+            document.querySelectorAll('.tb').forEach(function(t) { t.classList.remove('active'); });
+            el.classList.add('active');
+            var t = el.getAttribute('data-tab');
+            document.getElementById('favBox').style.display = t === 'fav' ? '' : 'none';
+            document.getElementById('tryonBox').style.display = t === 'tryon' ? '' : 'none';
+        };
+    });
+
+    var params = new URLSearchParams(window.location.search);
+    var device = params.get('device') || '';
+    var tab = params.get('tab') || 'fav';
+
+    if (device) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '/api/data?device=' + encodeURIComponent(device), true);
+        xhr.onload = function() {
+            try {
+                var d = JSON.parse(xhr.responseText);
+                _renderGrid('收藏', d.favs || [], 'favBox');
+                _renderGrid('试戴记录', d.tryons || [], 'tryonBox');
+                if (tab === 'tryon') {
+                    var el = document.querySelector('.tb[data-tab="tryon"]');
+                    if (el) el.click();
+                }
+            } catch(e) {
+                document.getElementById('favBox').innerHTML = '<div class="em"><div class="em-txt">数据加载失败</div></div>';
+            }
+        };
+        xhr.onerror = function() {
+            document.getElementById('favBox').innerHTML = '<div class="em"><div class="em-txt">网络连接失败</div></div>';
+        };
+        xhr.send();
+    } else {
+        document.getElementById('favBox').innerHTML = '<div class="em"><iconify-icon icon="lucide:smartphone" width="36" height="36" class="em-icon"></iconify-icon><div class="em-txt">请从主页进入<br>（需携带设备标识）</div></div>';
+    }
+})();
+</script>
+</body>
+</html>

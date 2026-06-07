@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>美甲在线试戴</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: #f5f0eb;
+  min-height: 100vh;
+  color: #333;
+}
+.header {
+  background: linear-gradient(135deg, #e8b4b8 0%, #d4a0a0 50%, #c99696 100%);
+  padding: 24px 0;
+  text-align: center;
+  color: #fff;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+.header h1 { font-size: 28px; font-weight: 600; letter-spacing: 2px; }
+.header p { font-size: 14px; opacity: 0.85; margin-top: 4px; }
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 20px;
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+/* 左侧面板 */
+.panel {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  flex: 1;
+  min-width: 300px;
+  max-width: 420px;
+}
+.panel h2 {
+  font-size: 18px;
+  margin-bottom: 16px;
+  color: #b88080;
+  border-bottom: 2px solid #f0e0e0;
+  padding-bottom: 8px;
+}
+
+/* 上传区 */
+.upload-zone {
+  border: 2px dashed #d4b8b8;
+  border-radius: 12px;
+  padding: 32px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #fdf8f8;
+  min-height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+.upload-zone:hover { border-color: #b88080; background: #fdf0f0; }
+.upload-zone.has-image { border-style: solid; padding: 0; overflow: hidden; }
+.upload-zone img { max-width: 100%; max-height: 260px; display: block; }
+.upload-zone .placeholder { color: #b88080; font-size: 14px; }
+.upload-zone .placeholder .icon { font-size: 40px; margin-bottom: 8px; }
+
+/* 商品选择 */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.product-card {
+  border: 2px solid #e8d8d8;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  overflow: hidden;
+  text-align: center;
+  position: relative;
+}
+.product-card:hover { border-color: #d4a0a0; transform: translateY(-1px); }
+.product-card.selected { border-color: #c97070; box-shadow: 0 0 0 3px rgba(201,112,112,0.2); }
+.product-card img {
+  width: 100%;
+  height: 80px;
+  object-fit: cover;
+  display: block;
+}
+.product-card .label {
+  font-size: 11px;
+  padding: 6px;
+  color: #666;
+  background: #faf5f5;
+}
+.product-card .badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: #c97070;
+  color: #fff;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 8px;
+}
+
+/* 按钮 */
+.btn-tryon {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #c97070 0%, #b85050 100%);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 2px;
+  transition: all 0.2s;
+  margin-top: 16px;
+}
+.btn-tryon:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(184,80,80,0.3); }
+.btn-tryon:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+
+/* 右侧预览 */
+.preview-panel {
+  flex: 1.5;
+  min-width: 400px;
+  max-width: 700px;
+}
+.preview-area {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  text-align: center;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+.preview-area canvas {
+  max-width: 100%;
+  max-height: 500px;
+  border-radius: 8px;
+}
+.preview-area .empty {
+  color: #bbb;
+  font-size: 16px;
+}
+.preview-area .empty .icon { font-size: 48px; margin-bottom: 8px; }
+
+/* 切换按钮 */
+.toggle-bar {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  justify-content: center;
+}
+.toggle-btn {
+  padding: 8px 20px;
+  border: 2px solid #d4b8b8;
+  border-radius: 20px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  color: #b88080;
+  transition: all 0.2s;
+}
+.toggle-btn:hover { background: #fdf0f0; }
+.toggle-btn.active { background: #c97070; color: #fff; border-color: #c97070; }
+
+/* 状态提示 */
+.status {
+  text-align: center;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #999;
+  min-height: 20px;
+}
+.status.error { color: #c97070; }
+.status.success { color: #5a9e6f; }
+
+/* 加载动画 */
+.spinner {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border: 3px solid #f0e0e0;
+  border-top-color: #c97070;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .container { flex-direction: column; }
+  .panel { max-width: 100%; }
+  .preview-panel { max-width: 100%; min-width: 0; }
+}
+
+/* 滚动条 */
+.product-grid::-webkit-scrollbar { width: 4px; }
+.product-grid::-webkit-scrollbar-thumb { background: #d4b8b8; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>美甲在线试戴</h1>
+  <p>上传手部图片 · 选择心仪款式 · 一键预览效果</p>
+</div>
+
+<div class="container">
+  <!-- 左侧控制面板 -->
+  <div class="panel">
+    <h2>1. 上传手部图片</h2>
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+      <div class="placeholder" id="uploadPlaceholder">
+        <div class="icon">&#128247;</div>
+        <div>点击上传手部照片</div>
+        <div style="font-size:12px;color:#bbb;margin-top:4px">支持 JPG / PNG / WEBP</div>
+      </div>
+      <img id="uploadPreview" style="display:none" alt="预览">
+    </div>
+    <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleUpload(this)">
+
+    <h2 style="margin-top:20px">2. 选择商品款式</h2>
+    <div class="product-grid" id="productGrid">
+      <div style="grid-column:1/-1;text-align:center;color:#bbb;padding:20px">加载中...</div>
+    </div>
+
+    <button class="btn-tryon" id="btnTryon" disabled onclick="doTryon()">&#10022; 一键试戴</button>
+    <div class="status" id="status"></div>
+  </div>
+
+  <!-- 右侧预览区 -->
+  <div class="preview-panel">
+    <div class="preview-area" id="previewArea">
+      <div class="empty" id="previewEmpty">
+        <div class="icon">&#128065;</div>
+        <div>试戴效果将在此显示</div>
+      </div>
+      <canvas id="resultCanvas" style="display:none"></canvas>
+    </div>
+    <div class="toggle-bar" id="toggleBar" style="display:none">
+      <button class="toggle-btn active" onclick="switchView('result')">试戴效果</button>
+      <button class="toggle-btn" onclick="switchView('original')">原图</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── 全局状态 ──────────────────────────────────────
+let uploadedImage = null;       // 用户上传的原图 DataURL
+let selectedProduct = null;     // 选中的商品ID
+let resultImage = null;         // 试戴结果 DataURL
+let currentView = 'result';     // 当前视图
+
+// ── 初始化 ────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', loadProducts);
+
+// ── 上传处理 ──────────────────────────────────────
+function handleUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    uploadedImage = e.target.result;
+    const preview = document.getElementById('uploadPreview');
+    const placeholder = document.getElementById('uploadPlaceholder');
+    const zone = document.getElementById('uploadZone');
+
+    preview.src = uploadedImage;
+    preview.style.display = 'block';
+    placeholder.style.display = 'none';
+    zone.classList.add('has-image');
+
+    updateTryonButton();
+    // 重置结果
+    resetResult();
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── 加载商品列表 ──────────────────────────────────
+async function loadProducts() {
+  const grid = document.getElementById('productGrid');
+  try {
+    const resp = await fetch('/api/products');
+    const products = await resp.json();
+    grid.innerHTML = products.map(p => `
+      <div class="product-card" data-id="${p.id}" onclick="selectProduct('${p.id}', this)"
+           title="${p.name} (${p.nails}片)">
+        <img src="${p.preview}" alt="${p.name}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%2280%22><rect fill=%22%23f0e0e0%22 width=%22100%22 height=%2280%22/><text x=%2250%22 y=%2245%22 text-anchor=%22middle%22 fill=%22%23999%22 font-size=%2212%22>${p.name}</text></svg>'">
+        <div class="label">${p.name}</div>
+        ${p.nails < 5 ? `<div class="badge">${p.nails}片</div>` : ''}
+      </div>
+    `).join('');
+  } catch (e) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#c97070;padding:20px">加载失败</div>';
+  }
+}
+
+// ── 选择商品 ──────────────────────────────────────
+function selectProduct(productId, cardEl) {
+  document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
+  cardEl.classList.add('selected');
+  selectedProduct = productId;
+  updateTryonButton();
+  resetResult();
+}
+
+// ── 更新按钮状态 ──────────────────────────────────
+function updateTryonButton() {
+  const btn = document.getElementById('btnTryon');
+  btn.disabled = !(uploadedImage && selectedProduct);
+}
+
+// ── 重置结果 ──────────────────────────────────────
+function resetResult() {
+  resultImage = null;
+  currentView = 'result';
+  document.getElementById('resultCanvas').style.display = 'none';
+  document.getElementById('previewEmpty').style.display = 'block';
+  document.getElementById('toggleBar').style.display = 'none';
+  document.getElementById('status').textContent = '';
+  document.getElementById('status').className = 'status';
+}
+
+// ── 一键试戴 ──────────────────────────────────────
+async function doTryon() {
+  if (!uploadedImage || !selectedProduct) return;
+
+  const btn = document.getElementById('btnTryon');
+  const status = document.getElementById('status');
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>渲染中...';
+  status.textContent = '';
+  status.className = 'status';
+
+  try {
+    // 将 DataURL 转为 Blob
+    const resp = await fetch(uploadedImage);
+    const blob = await resp.blob();
+
+    const formData = new FormData();
+    formData.append('image', blob, 'hand.jpg');
+    formData.append('product_id', selectedProduct);
+
+    const result = await fetch('/api/tryon', {
+      method: 'POST',
+      body: formData,
+    });
+
+    const data = await result.json();
+    if (!data.success) {
+      throw new Error(data.error || '渲染失败');
+    }
+
+    resultImage = data.result;
+
+    // 显示结果
+    const canvas = document.getElementById('resultCanvas');
+    const img = new Image();
+    img.onload = function() {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      canvas.style.display = 'block';
+      document.getElementById('previewEmpty').style.display = 'none';
+      document.getElementById('toggleBar').style.display = 'flex';
+
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+
+      // 切换按钮状态
+      document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector('.toggle-btn:first-child').classList.add('active');
+      currentView = 'result';
+    };
+    img.src = resultImage;
+
+    if (data.missing && data.missing.length > 0) {
+      status.textContent = '部分指头缺失素材: ' + data.missing.map(i => ['拇指','食指','中指','无名指','小指'][i]).join('、');
+      status.className = 'status';
+    } else {
+      status.textContent = '试戴完成';
+      status.className = 'status success';
+    }
+
+  } catch (e) {
+    status.textContent = '错误: ' + e.message;
+    status.className = 'status error';
+  } finally {
+    btn.disabled = !(uploadedImage && selectedProduct);
+    btn.innerHTML = '&#10022; 一键试戴';
+  }
+}
+
+// ── 切换视图 ──────────────────────────────────────
+function switchView(view) {
+  if (view === currentView) return;
+  currentView = view;
+
+  document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+
+  const canvas = document.getElementById('resultCanvas');
+  const ctx = canvas.getContext('2d');
+
+  if (view === 'result' && resultImage) {
+    const img = new Image();
+    img.onload = function() {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+    };
+    img.src = resultImage;
+    document.querySelector('.toggle-btn:first-child').classList.add('active');
+  } else if (view === 'original' && uploadedImage) {
+    const img = new Image();
+    img.onload = function() {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+    };
+    img.src = uploadedImage;
+    document.querySelector('.toggle-btn:last-child').classList.add('active');
+  }
+}
+</script>
+</body>
+</html>

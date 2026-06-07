@@ -1,0 +1,6 @@
+mediapipe==0.10.9
+gradio
+opencv-python
+numpy
+Pillow
+apscheduler

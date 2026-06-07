@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Model weights (~400MB, download on demand)
+checkpoints/
+*.pth
+*.onnx
+*.pt
+
+# Dataset masks (~500MB)
+dataset/masks/
+
+# Large binary assets (~400MB total)
+assets/raw_images/
+assets/nail_cut3/
+assets/cut_nail_png/
+assets/nail_product2/
+
+# Gradio cert
+.gradio/
+
+# Keep points CSV in nail_cut3
+!assets/nail_cut3/nail_points.csv
+!assets/nail_cut3/nail_config.csv
+
+# Logs
+logs/
+
+# Temp
+*.tmp
+$remoteFile
+.tunnel_urls.json

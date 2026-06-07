@@ -1,0 +1,2 @@
+product_id,current_avg_fit,current_avg_quality,suggest_type,suggest_detail
+1,82.5,72.5,综合优化,quality=72.5/fit=82.5 有提升空间，建议微调四点参数并检查甲片边缘

@@ -1,0 +1,36 @@
+{
+  "auto_optimize_enabled": true,
+  "max_products_per_run": 3,
+  "point_adjust_step": 1.0,
+  "backup_enabled": true,
+  "backup_dir": "assets/backup",
+
+  "llm": {
+    "enable": true,
+    "api_url": "https://api.longcat.chat/openai",
+    "api_key": "ak_2138yZ3vd0oY9m42rT3GQ6ZY2kc84",
+    "model": "LongCat-2.0-Preview",
+    "timeout": 30
+  },
+
+  "quality_thresholds": {
+    "fit_score_fail": 55,
+    "quality_score_fail": 60,
+    "fit_score_good": 80,
+    "quality_score_good": 80
+  },
+  "logs": {
+    "max_days": 30,
+    "archive_enabled": true,
+    "archive_dir": "logs/archive"
+  },
+  "segmentor": {
+    "u2net_min_area_ratio": 0.0003,
+    "u2net_max_area_ratio": 0.40,
+    "sam_enabled": true
+  },
+  "resources": {
+    "check_on_startup": true,
+    "missing_is_warning": true
+  }
+}
